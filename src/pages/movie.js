@@ -15,7 +15,75 @@ import { FormikField } from '../components/formik-field'
 import { Page } from '../components/page'
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000'
+export const MovieFields = () => [
+    <FormikField
+        name="name"
+        readOnly={true}
+        label="Name"
+        helper="movies name"
+    />,
+    <FormikField label="Year" name="year" helper="Year movie was made" />,
+    <FormikField
+        label="Synopsis"
+        name="synopsis"
+        helper="Synopsis of the movie"
+    />,
+    <FormikField label="Rating" name="rating" helper="rating of the movie" />,
+    <FormikField
+        label="Age limit"
+        name="ageLimit"
+        helper="age limit of the movie"
+    />,
+    <FormikField
+        label="Director"
+        name="director"
+        helper="Director of the movie"
+    />,
+]
+export const Genres = () => (
+    <FormControl>
+        <Typography variant="subtitle1">Genres</Typography>
+        <ChipsList name="genres" />
+    </FormControl>
+)
 
+export const Actors = () => [
+    <Typography variant="subtitle1">Actors</Typography>,
+    <FieldArray
+        name="actors"
+        render={(arrayHelpers) => {
+            const { actors } = arrayHelpers.form.values
+            const addActor = () => {
+                arrayHelpers.push('')
+            }
+            const deleteActor = (index) => () => {
+                arrayHelpers.remove(index)
+            }
+
+            return (
+                <Grid item>
+                    <Grid container direction="column">
+                        {actors &&
+                            actors.map((a, i) => {
+                                return (
+                                    <Grid>
+                                        <FormikField name={`actors.${i}`} />
+                                        <IconButton
+                                            edge="end"
+                                            aria-label="delete"
+                                        >
+                                            <Delete onClick={deleteActor(i)} />
+                                        </IconButton>
+                                    </Grid>
+                                )
+                            })}
+                        <Button onClick={addActor}>Add actor</Button>
+                    </Grid>
+                </Grid>
+            )
+        }}
+    />,
+]
 export const Movie = (props) => {
     const [movie, setMovie] = useState({})
     const [error, setError] = useState(undefined)
@@ -67,85 +135,9 @@ export const Movie = (props) => {
                         alignItems="center"
                         spacing={2}
                     >
-                        <FormikField
-                            name="name"
-                            readOnly={true}
-                            label="Name"
-                            helper="movies name"
-                        />
-                        <FormikField
-                            label="Year"
-                            name="year"
-                            helper="Year movie was made"
-                        />
-                        <FormikField
-                            label="Synopsis"
-                            name="synopsis"
-                            helper="Synopsis of the movie"
-                        />
-                        <FormikField
-                            label="Rating"
-                            name="rating"
-                            helper="rating of the movie"
-                        />
-                        <FormikField
-                            label="Age limit"
-                            name="ageLimit"
-                            helper="age limit of the movie"
-                        />
-                        <FormikField
-                            label="Director"
-                            name="director"
-                            helper="Director of the movie"
-                        />
-                        <Typography variant="subtitle1">Actors</Typography>
-                        <FieldArray
-                            name="actors"
-                            render={(arrayHelpers) => {
-                                const { actors } = arrayHelpers.form.values
-                                const addActor = () => {
-                                    arrayHelpers.push('')
-                                }
-                                const deleteActor = (index) => () => {
-                                    arrayHelpers.remove(index)
-                                }
-
-                                return (
-                                    <Grid item>
-                                        <Grid container direction="column">
-                                            {actors &&
-                                                actors.map((a, i) => {
-                                                    return (
-                                                        <Grid>
-                                                            <FormikField
-                                                                name={`actors.${i}`}
-                                                            />
-                                                            <IconButton
-                                                                edge="end"
-                                                                aria-label="delete"
-                                                            >
-                                                                <Delete
-                                                                    onClick={deleteActor(
-                                                                        i
-                                                                    )}
-                                                                />
-                                                            </IconButton>
-                                                        </Grid>
-                                                    )
-                                                })}
-                                            <Button onClick={addActor}>
-                                                Add actor
-                                            </Button>
-                                        </Grid>
-                                    </Grid>
-                                )
-                            }}
-                        />
-
-                        <FormControl>
-                            <Typography variant="subtitle1">Genres</Typography>
-                            <ChipsList name="genres" />
-                        </FormControl>
+                        <MovieFields />
+                        <Actors />
+                        <Genres />
                         <Grid item>
                             <Button onClick={onClickBack}>Cancel</Button>
                             <Button type="submit" variant="contained" disabled>
@@ -158,10 +150,3 @@ export const Movie = (props) => {
         </Page>
     )
 }
-/**
- *       <FormikField
-                            label="Actors"
-                            name="actors"
-                            helper="Actors of the movie"
-                        />
- */
