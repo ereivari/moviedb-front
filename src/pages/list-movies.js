@@ -18,6 +18,7 @@ const COLUMNS = [
     },
     {
         field: 'year',
+        type: 'number',
         headerName: 'Vuosi',
         width: 100,
     },
@@ -56,6 +57,7 @@ export const ListMovies = () => {
                 `${API_URL}/movies?limit=${limit}&offset=${offset}&orderby=${order}&direction=${sort}&${whereStr}`
             )
             .then((movies) => {
+                setError(undefined)
                 setCount(movies.data.count)
                 setMovies(movies.data.rows)
                 setLoading(false)
@@ -68,12 +70,13 @@ export const ListMovies = () => {
         getMovies('name', 25, 0, 'asc')
     }, [])
 
-    if (error || loading) {
-        return <div>Virhe tapahtui</div>
+    if (loading) {
+        return <div>Ladataan</div>
     }
 
     return (
         <Page>
+            {error && <div>Virhe haussa</div>}
             <List
                 columns={COLUMNS}
                 count={count}

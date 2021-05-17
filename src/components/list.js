@@ -27,7 +27,13 @@ export const List = (props) => {
                         search
                     )
                 }
-                return <TextField label={s.field} onChange={onFieldChange} />
+                return (
+                    <TextField
+                        type={s.type || ''}
+                        label={s.field}
+                        onChange={onFieldChange}
+                    />
+                )
             })}
             <XGrid
                 pageSize={pageSize}
