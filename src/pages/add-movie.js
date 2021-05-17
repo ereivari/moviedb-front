@@ -8,39 +8,28 @@ import {
 import { Delete } from '@material-ui/icons'
 import axios from 'axios'
 import { FieldArray, Form, Formik } from 'formik'
-import React, { useEffect, useState, useCallback } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import { ChipsList } from '../components/chips-list'
 import { FormikField } from '../components/formik-field'
 import { Page } from '../components/page'
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000'
 
-export const Movie = (props) => {
-    const [movie, setMovie] = useState({})
-    const [error, setError] = useState(undefined)
-    const location = useLocation()
+/**
+ *  Form to add movie
+ * @param {*} props
+ * @returns
+ */
+export const AddMovie = (props) => {
+    const [error] = useState(undefined)
     const history = useHistory()
-
-    const getMovie = useCallback(() => {
-        const query = new URLSearchParams(location.search)
-        axios
-            .get(`${API_URL}/movie?name=${query.get('name')}`)
-            .then((movie) => {
-                setMovie(movie.data)
-            })
-            .catch(setError)
-    }, [location.search])
-
-    useEffect(() => {
-        getMovie()
-    }, [getMovie])
 
     const onClickBack = () => {
         history.goBack()
     }
 
-    if (error || !movie) {
+    if (error) {
         return (
             <div>
                 <Button onClick={onClickBack}>Back</Button>
@@ -48,15 +37,34 @@ export const Movie = (props) => {
             </div>
         )
     }
+
     return (
         <Page>
             <Formik
-                initialValues={movie}
+                initialValues={{}}
                 isInitialValid
                 enableReinitialize
                 onSubmit={async (values) => {
-                    await new Promise((r) => setTimeout(r, 500))
-                    alert(JSON.stringify(values, null, 2))
+                    const dir = values.director.split(' ')
+
+                    axios
+                        .post(`${API_URL}/movie`, {
+                            ...values,
+                            director: {
+                                firstName: dir[0],
+                                lastName: dir[1],
+                            },
+                            actors: values.actors.map((a) => {
+                                return {
+                                    firstName: a[0],
+                                    lastName: a[1],
+                                }
+                            }),
+                        })
+                        .then((p) => {
+                            alert('Movie Added Successfully')
+                        })
+                        .catch((e) => alert(e))
                 }}
             >
                 <Form>
@@ -79,16 +87,6 @@ export const Movie = (props) => {
                             helper="Year movie was made"
                         />
                         <FormikField
-                            label="Synopsis"
-                            name="synopsis"
-                            helper="Synopsis of the movie"
-                        />
-                        <FormikField
-                            label="Rating"
-                            name="rating"
-                            helper="rating of the movie"
-                        />
-                        <FormikField
                             label="Age limit"
                             name="ageLimit"
                             helper="age limit of the movie"
@@ -97,6 +95,16 @@ export const Movie = (props) => {
                             label="Director"
                             name="director"
                             helper="Director of the movie"
+                        />
+                        <FormikField
+                            label="Synopsis"
+                            name="synopsis"
+                            helper="Synopsis of the movie"
+                        />
+                        <FormikField
+                            label="Rating"
+                            name="rating"
+                            helper="rating of the movie"
                         />
                         <Typography variant="subtitle1">Actors</Typography>
                         <FieldArray
@@ -141,14 +149,13 @@ export const Movie = (props) => {
                                 )
                             }}
                         />
-
                         <FormControl>
                             <Typography variant="subtitle1">Genres</Typography>
                             <ChipsList name="genres" />
                         </FormControl>
                         <Grid item>
                             <Button onClick={onClickBack}>Cancel</Button>
-                            <Button type="submit" variant="contained" disabled>
+                            <Button type="submit" variant="contained">
                                 Submit
                             </Button>
                         </Grid>
@@ -158,10 +165,3 @@ export const Movie = (props) => {
         </Page>
     )
 }
-/**
- *       <FormikField
-                            label="Actors"
-                            name="actors"
-                            helper="Actors of the movie"
-                        />
- */

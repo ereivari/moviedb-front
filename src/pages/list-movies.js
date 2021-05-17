@@ -1,10 +1,10 @@
-import react, { useEffect, setState, useState } from 'react'
-import { List } from '../components/list'
-import { grid } from '@material-ui/core'
-import { Page } from '../components/page'
 import axios from 'axios'
-
+import { ButtonBase } from '@material-ui/core'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { List } from '../components/list'
+import { Page } from '../components/page'
+
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000'
 
 const COLUMNS = [
@@ -26,6 +26,16 @@ const COLUMNS = [
         headerName: 'Genret',
         width: 210,
     },
+    {
+        field: 'actors',
+        headerName: 'Actors',
+        width: 210,
+    },
+    {
+        field: 'director',
+        headerName: 'Director',
+        width: 210,
+    },
 ]
 
 export const ListMovies = () => {
@@ -34,25 +44,31 @@ export const ListMovies = () => {
     const [loading, setLoading] = useState(true)
     const [count, setCount] = useState(0)
 
-    const getMovies = (order, limit, offset, sort) => {
+    const getMovies = (order, limit, offset, sort, search) => {
+        const whereStr = search
+            ? Object.keys(search)
+                  .map((v) => search[v] && `${v}=${search[v]}`)
+                  .join('&')
+            : ''
+
         axios
             .get(
-                `${API_URL}/movies?limit=${limit}&offset=${offset}&orderby=${order}&direction=${sort}`
+                `${API_URL}/movies?limit=${limit}&offset=${offset}&orderby=${order}&direction=${sort}&${whereStr}`
             )
             .then((movies) => {
-                setLoading(false)
                 setCount(movies.data.count)
                 setMovies(movies.data.rows)
+                setLoading(false)
             })
             .catch(setError)
     }
 
     useEffect(() => {
         setLoading(true)
-        getMovies('name', 10, 0, 'asc')
+        getMovies('name', 25, 0, 'asc')
     }, [])
 
-    if (error) {
+    if (error || loading) {
         return <div>Virhe tapahtui</div>
     }
 
@@ -63,12 +79,11 @@ export const ListMovies = () => {
                 count={count}
                 loading={loading}
                 getRows={getMovies}
-                rows={movies.map((m) => {
-                    return { ...m, id: m.name }
-                })}
-            >
-                asdsad
-            </List>
+                rows={movies}
+            />
+            <ButtonBase>
+                <Link to="/add-movie">Uusi Elokuva</Link>
+            </ButtonBase>
         </Page>
     )
 }

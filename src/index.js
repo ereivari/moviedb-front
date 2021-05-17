@@ -2,18 +2,31 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { ListMovies } from './pages/list-movies'
 import { Movie } from './pages/movie'
+import { AddMovie } from './pages/add-movie'
 import reportWebVitals from './reportWebVitals'
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom'
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles'
+
+const theme = createMuiTheme({
+    palette: {
+        secondary: {
+            main: '#fff',
+        },
+    },
+})
 
 ReactDOM.render(
     <React.StrictMode>
-        <BrowserRouter>
-            <Switch>
-                <Route path="/list" component={ListMovies} />
-                <Route path="/movie" component={Movie} />
-                <Redirect to="/list" />
-            </Switch>
-        </BrowserRouter>
+        <ThemeProvider theme={theme}>
+            <BrowserRouter>
+                <Switch>
+                    <Route path="/list" component={ListMovies} />
+                    <Route path="/movie" component={Movie} />
+                    <Route path="/add-movie" component={AddMovie} />
+                    <Redirect to="/list" />
+                </Switch>
+            </BrowserRouter>
+        </ThemeProvider>
     </React.StrictMode>,
     document.getElementById('root')
 )

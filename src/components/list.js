@@ -1,28 +1,41 @@
 import React, { useState } from 'react'
 import { XGrid } from '@material-ui/x-grid'
-import { useDemoData } from '@material-ui/x-grid-data-generator'
+
+import { TextField } from '@material-ui/core'
 
 export const List = (props) => {
-    /*const hjk = useDemoData({
-        dataSet: 'Commodity',
-        rowLength: 100000,
-    })
-    console.log(hjk.data)*/
     const { columns, rows } = props
-    const [pageInfo, setPageInfo] = useState({
-        page: 0,
-        pageSize: 25,
-    })
-    const [sort, setSort] = useState({})
 
+    const [pageSize, setPageSize] = useState(25)
+    const [page, setPage] = useState(0)
+    const [sort, setSort] = useState({ field: 'name', sort: 'asc' })
+    const [search, setSearch] = useState({})
+    if (props.loading) {
+        return null
+    }
     return (
         <div style={{ height: 520, width: '100%' }}>
+            {columns.map((s) => {
+                const onFieldChange = (event) => {
+                    search[s.field] = event.target.value
+                    setSearch(search)
+                    props.getRows(
+                        sort.field,
+                        pageSize,
+                        page * pageSize,
+                        sort.sort,
+                        search
+                    )
+                }
+                return <TextField label={s.field} onChange={onFieldChange} />
+            })}
             <XGrid
-                rows={rows}
+                pageSize={pageSize}
+                page={page}
+                rows={rows.map((r) => ({ ...r, id: r.name }))}
                 columns={columns}
                 onSortModelChange={(col) => {
                     const { sortModel } = col
-                    const { page, pageSize } = pageInfo
 
                     setSort(sortModel[0])
                     if (sortModel.length > 0) {
@@ -30,42 +43,41 @@ export const List = (props) => {
                             sortModel[0].field,
                             pageSize,
                             page * pageSize,
-                            sortModel[0].sort
+                            sortModel[0].sort,
+                            search
                         )
                     }
                 }}
                 onPageSizeChange={(p) => {
-                    const { page, pageSize } = p
-                    setPageInfo(p)
+                    const { pageSize } = p
+                    setPageSize(parseInt(pageSize, 10))
                     props.getRows(
                         sort.field,
                         pageSize,
                         page * pageSize,
-                        sort.sort
+                        sort.sort,
+                        search
                     )
                 }}
                 onPageChange={(p) => {
-                    const { page, pageSize } = p
-                    setPageInfo(p)
+                    const { page } = p
+                    setPage(parseInt(page, 10))
                     props.getRows(
                         sort.field,
                         pageSize,
                         page * pageSize,
-                        sort.sort
+                        sort.sort,
+                        search
                     )
-                }}
-                onEditRowModelChange={(p) => {
-                    console.log(p)
                 }}
                 rowCount={props.count}
                 sortingOrder={['asc', 'desc']}
                 pagination
                 sortingMode="server"
-                rowsPerPageOptions={[25, 50, 100]}
+                rowsPerPageOptions={[25]}
                 paginationMode="server"
                 loading={props.loading}
                 rowHeight={38}
-                checkboxSelection
             />
         </div>
     )
